@@ -1,0 +1,31 @@
+FROM alpine:3.9
+
+ENV PHP_VERSION 7.2.14
+
+RUN set -x \
+    && apk update \
+    && apk add openssl-dev nghttp2-dev librdkafka-dev \
+    && apk add gcc g++ make \
+    && apk add php7 php7-fpm php7-apcu php7-bcmath php7-bz2 php7-calendar php7-ctype php7-curl php7-dom php7-exif php7-fileinfo php7-ftp php7-gd php7-gettext php7-iconv php7-imap php7-json php7-ldap php7-mysqli php7-pcntl php7-pdo php7-pdo_mysql php7-pdo_sqlite php7-phar php7-posix php7-session php7-shmop php7-simplexml php7-soap php7-sockets php7-sqlite3 php7-sysvmsg php7-sysvsem php7-sysvshm php7-tokenizer php7-xml php7-xmlreader php7-xmlrpc php7-xmlwriter php7-xsl php7-opcache php7-zip php7-dev php7-pear \
+    && pecl install redis \
+    && pecl install mongodb \
+    && pecl install rdkafka \
+    && pecl install protobuf \
+    && pecl download swoole \
+    && mkdir swoole \
+    && tar zxvf swoole-* -C /swoole \
+    && cd /swoole/swoole-* \
+    && phpize \
+    && ./configure --enable-openssl --enable-http2 --enable-sockets --enable-mysqlnd \
+    && make && make install \
+    && echo "extension=swoole.so" > /etc/php7/conf.d/03_swoole.ini \
+    && echo "extension=redis.so" > /etc/php7/conf.d/04_redis.ini \
+    && echo "extension=mongodb.so" > /etc/php7/conf.d/05_mongodb.ini \
+    && echo "extension=rdkafka.so" > /etc/php7/conf.d/06_rdkafka.ini \
+    && echo "extension=protobuf.so" > /etc/php7/conf.d/07_protobuf.ini \
+    && mkdir -p /var/www/html \
+    && sed -i 's/;daemonize = yes/daemonize = no/g' /etc/php7/php-fpm.conf \
+    && sed -i 's/listen = 127.0.0.1:9000/listen = 0.0.0.0:9000/g' /etc/php7/php-fpm.d/www.conf \
+    && apk del gcc g++ make php7-pear php7-dev \
+    && cd / \
+    && rm -rf /tmp/* /swoole* /*.xml /var/cache/apk/*
