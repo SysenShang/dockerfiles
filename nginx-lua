@@ -2,11 +2,17 @@ FROM alpine:3.9
 
 RUN set -x \
     && apk update \
-    && apk add pcre-dev openssl-dev nghttp2-dev zlib-dev lua-dev \
+    && apk add pcre-dev openssl-dev nghttp2-dev zlib-dev lua-dev luajit-dev \
     && apk add git gcc g++ make \
     && git clone https://github.com/openresty/lua-nginx-module.git \
     && git clone https://github.com/simplresty/ngx_devel_kit.git \
     && git clone https://github.com/vozlt/nginx-module-vts.git \
+    && wget http://luajit.org/download/LuaJIT-2.0.4.tar.gz \
+    && tar zxvf LuaJIT-2.0.4.tar.gz \
+    && cd LuaJIT-2.0.4 \
+    && make install PREFIX=/usr/local/luajit \
+    && export LUAJIT_LIB=/usr/local/luajit/lib \
+	&& export LUAJIT_INC=/usr/local/luajit/include/luajit-2.0 \
     && wget http://nginx.org/download/nginx-1.14.2.tar.gz \
     && tar zxvf nginx-1.14.2.tar.gz \
     && cd nginx-1.14.2 \
