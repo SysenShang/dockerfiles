@@ -2,7 +2,7 @@ FROM alpine:3.9
 
 RUN set -x \
     && apk update \
-    && apk add pcre-dev openssl-dev nghttp2-dev zlib-dev lua \
+    && apk add pcre-dev openssl-dev nghttp2-dev zlib-dev lua-dev \
     && apk add git gcc g++ make \
     && git clone https://github.com/openresty/lua-nginx-module.git \
     && git clone https://github.com/simplresty/ngx_devel_kit.git \
