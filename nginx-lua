@@ -13,6 +13,7 @@ RUN set -x \
     && make install PREFIX=/usr/local/luajit \
     && export LUAJIT_LIB=/usr/local/luajit/lib \
 	&& export LUAJIT_INC=/usr/local/luajit/include/luajit-2.0 \
+	&& ln -s /usr/local/luajit/lib/libluajit-5.1.so.2 /lib/libluajit-5.1.so.2 \
     && wget http://nginx.org/download/nginx-1.14.2.tar.gz \
     && tar zxvf nginx-1.14.2.tar.gz \
     && cd nginx-1.14.2 \
@@ -21,7 +22,7 @@ RUN set -x \
     && mkdir -p /var/www/html /etc/nginx/conf/vhosts \
     && apk del git gcc g++ make \
     && cd / \
-    && rm -rf /tmp/* /var/cache/apk/* /nginx-* /ngx_devel_kit /lua-nginx-module
+    && rm -rf /tmp/* /var/cache/apk/* /LuaJIT-* /nginx-* /ngx_devel_kit /lua-nginx-module
 
 EXPOSE 80
 
