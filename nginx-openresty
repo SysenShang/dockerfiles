@@ -12,7 +12,6 @@ LABEL maintainer="Evan Wies <evan@neomantra.net>"
 ARG RESTY_VERSION="1.15.8.1rc1"
 ARG RESTY_OPENSSL_VERSION="1.0.2r"
 ARG RESTY_PCRE_VERSION="8.42"
-ARG RESTY_VTS_VERSION="0.1.18"
 ARG RESTY_J="1"
 ARG RESTY_CONFIG_OPTIONS="\
     --with-file-aio \
@@ -93,8 +92,9 @@ RUN apk add --no-cache --virtual .build-deps \
     && if [ -n "${RESTY_EVAL_PRE_CONFIGURE}" ]; then eval $(echo ${RESTY_EVAL_PRE_CONFIGURE}); fi \
     && curl -fSL https://www.openssl.org/source/openssl-${RESTY_OPENSSL_VERSION}.tar.gz -o openssl-${RESTY_OPENSSL_VERSION}.tar.gz \
     && tar xzf openssl-${RESTY_OPENSSL_VERSION}.tar.gz \
-    && curl -fSL https://github.com/vozlt/nginx-module-vts/archive/v${RESTY_VTS_VERSION}.tar.gz -o vts-${RESTY_VTS_VERSION}.tar.gz \
-    && tar xzf vts-${RESTY_VTS_VERSION}.tar.gz \
+    && curl -fSL https://github.com/vozlt/nginx-module-vts/archive/v0.1.18.tar.gz -o nginx-module-vts-0.1.18.tar.gz \
+    && tar xzf nginx-module-vts-0.1.18.tar.gz \
+    && mv nginx-module-vts-0.1.18 nginx-module-vts \
     && curl -fSL https://ftp.pcre.org/pub/pcre/pcre-${RESTY_PCRE_VERSION}.tar.gz -o pcre-${RESTY_PCRE_VERSION}.tar.gz \
     && tar xzf pcre-${RESTY_PCRE_VERSION}.tar.gz \
     && curl -fSL https://openresty.org/download/openresty-${RESTY_VERSION}.tar.gz -o openresty-${RESTY_VERSION}.tar.gz \
@@ -108,8 +108,8 @@ RUN apk add --no-cache --virtual .build-deps \
     && rm -rf \
         openssl-${RESTY_OPENSSL_VERSION} \
         openssl-${RESTY_OPENSSL_VERSION}.tar.gz \
-        vts-${RESTY_VTS_VERSION} \
-        vts-${RESTY_VTS_VERSION}.tar.gz \
+        nginx-module-vts \
+        nginx-module-vts-0.1.18.tar.gz \
         openresty-${RESTY_VERSION}.tar.gz openresty-${RESTY_VERSION} \
         pcre-${RESTY_PCRE_VERSION}.tar.gz pcre-${RESTY_PCRE_VERSION} \
     && apk del .build-deps \
