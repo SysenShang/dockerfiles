@@ -69,13 +69,12 @@ RUN set -xe; \
 	\
 	apk add --no-cache --virtual .fetch-deps \
 		gnupg \
-		wget \
 	; \
 	\
 	mkdir -p /usr/src; \
 	cd /usr/src; \
 	\
-	wget -O php.tar.xz "$PHP_URL"; \
+	curl -fSL "$PHP_URL" -o php.tar.xz; \
 	\
 	if [ -n "$PHP_SHA256" ]; then \
 		echo "$PHP_SHA256 *php.tar.xz" | sha256sum -c -; \
@@ -85,7 +84,7 @@ RUN set -xe; \
 	fi; \
 	\
 	if [ -n "$PHP_ASC_URL" ]; then \
-		wget -O php.tar.xz.asc "$PHP_ASC_URL"; \
+		curl -fSL "$PHP_ASC_URL" -o php.tar.xz.asc; \
 		export GNUPGHOME="$(mktemp -d)"; \
 		for key in $GPG_KEYS; do \
 			gpg --batch --keyserver ha.pool.sks-keyservers.net --recv-keys "$key"; \
@@ -116,6 +115,7 @@ RUN set -xe \
 		libxslt-dev \
 		gettext-dev \
 		icu-dev \
+		openldap-dev \
 # end install custom deps
 	\
 	&& export CFLAGS="$PHP_CFLAGS" \
