@@ -116,6 +116,7 @@ RUN set -xe \
 		gettext-dev \
 		icu-dev \
 		openldap-dev \
+		libmcrypt-dev \
 # end install custom deps
 	\
 	&& export CFLAGS="$PHP_CFLAGS" \
