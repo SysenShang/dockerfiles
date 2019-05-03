@@ -42,7 +42,6 @@ ARG RESTY_CONFIG_OPTIONS="\
     --with-stream \
     --with-stream_ssl_module \
     --with-threads \
-    --add-module=/tmp/nginx-module-vts \
     "
 ARG RESTY_CONFIG_OPTIONS_MORE=""
 ARG RESTY_ADD_PACKAGE_BUILDDEPS=""
@@ -92,15 +91,18 @@ RUN apk add --no-cache --virtual .build-deps \
     && if [ -n "${RESTY_EVAL_PRE_CONFIGURE}" ]; then eval $(echo ${RESTY_EVAL_PRE_CONFIGURE}); fi \
     && curl -fSL https://www.openssl.org/source/openssl-${RESTY_OPENSSL_VERSION}.tar.gz -o openssl-${RESTY_OPENSSL_VERSION}.tar.gz \
     && tar xzf openssl-${RESTY_OPENSSL_VERSION}.tar.gz \
-    && curl -fSL https://github.com/vozlt/nginx-module-vts/archive/v0.1.18.tar.gz -o nginx-module-vts-0.1.18.tar.gz \
-    && tar xzf nginx-module-vts-0.1.18.tar.gz \
-    && mv nginx-module-vts-0.1.18 nginx-module-vts \
     && curl -fSL https://ftp.pcre.org/pub/pcre/pcre-${RESTY_PCRE_VERSION}.tar.gz -o pcre-${RESTY_PCRE_VERSION}.tar.gz \
     && tar xzf pcre-${RESTY_PCRE_VERSION}.tar.gz \
     && curl -fSL https://openresty.org/download/openresty-${RESTY_VERSION}.tar.gz -o openresty-${RESTY_VERSION}.tar.gz \
     && tar xzf openresty-${RESTY_VERSION}.tar.gz \
     && cd /tmp/openresty-${RESTY_VERSION} \
-    && ./configure -j${RESTY_J} ${_RESTY_CONFIG_DEPS} ${RESTY_CONFIG_OPTIONS} ${RESTY_CONFIG_OPTIONS_MORE} \
+# start install custom module
+    && curl -fSL https://github.com/vozlt/nginx-module-vts/archive/v0.1.18.tar.gz -o nginx-module-vts-0.1.18.tar.gz \
+    && tar xzf nginx-module-vts-0.1.18.tar.gz \
+    && mv nginx-module-vts-0.1.18 nginx-module-vts \
+	&& RESTY_CUSTOM_MODULE="--add-module=nginx-module-vts" \
+# end install custom module
+    && ./configure -j${RESTY_J} ${_RESTY_CONFIG_DEPS} ${RESTY_CONFIG_OPTIONS} ${RESTY_CUSTOM_MODULE} ${RESTY_CONFIG_OPTIONS_MORE} \
     && make -j${RESTY_J} \
     && make -j${RESTY_J} install \
     && cd /tmp \
@@ -108,8 +110,6 @@ RUN apk add --no-cache --virtual .build-deps \
     && rm -rf \
         openssl-${RESTY_OPENSSL_VERSION} \
         openssl-${RESTY_OPENSSL_VERSION}.tar.gz \
-        nginx-module-vts \
-        nginx-module-vts-0.1.18.tar.gz \
         openresty-${RESTY_VERSION}.tar.gz openresty-${RESTY_VERSION} \
         pcre-${RESTY_PCRE_VERSION}.tar.gz pcre-${RESTY_PCRE_VERSION} \
     && apk del .build-deps \
