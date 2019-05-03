@@ -150,6 +150,7 @@ RUN set -xe \
 		--with-zlib \
 # start custom extension
 		--enable-sockets \
+		--enable-calendar \
 		--with-ldap \
 		--with-freetype-dir \
 		--with-jpeg-dir \
@@ -157,8 +158,11 @@ RUN set -xe \
 		--with-gd \
 		--with-mysqli \
 		--with-pdo-mysql=mysqlnd \
+		--enable-shmop \
 		--enable-bcmath \
+		--enable-sysvmsg \
 		--enable-sysvsem \
+		--enable-sysvshm \
 		--with-mcrypt \
 		--enable-pcntl \
 		--enable-zip \
@@ -169,6 +173,7 @@ RUN set -xe \
 		--with-gettext \
 		--enable-opcache \
 		--with-xsl \
+		--with-xmlrpc \
 # end custom extension
 		\
 # bundled pcre does not support JIT on s390x
@@ -197,10 +202,10 @@ RUN set -xe \
 	&& phpize && ./configure && make && make install \
 	&& cd /tmp && tar zxf rdkafka-3.1.0.tgz && cd rdkafka-3.1.0 \
 	&& phpize && ./configure && make && make install \
-	&& cd /tmp && rm -rf /tmp/swoole* /tmp/redis* /tmp/mongodb* /tmp/rdkafka* && apk del nghttp2-dev librdkafka-dev \
-	&& echo "extension=redis" > /usr/local/etc/php/conf.d/docker-php-ext-redis.ini \
-	&& echo "extension=rdkafka" > /usr/local/etc/php/conf.d/docker-php-ext-rdkafka.ini \
-	&& echo "extension=mongodb" > /usr/local/etc/php/conf.d/docker-php-ext-mongodb.ini \
+	&& cd /tmp && rm -rf /tmp/swoole* /tmp/redis* /tmp/mongodb* /tmp/rdkafka* && apk del librdkafka-dev \
+	&& echo "extension=redis.so" > /usr/local/etc/php/conf.d/docker-php-ext-redis.ini \
+	&& echo "extension=rdkafka.so" > /usr/local/etc/php/conf.d/docker-php-ext-rdkafka.ini \
+	&& echo "extension=mongodb.so" > /usr/local/etc/php/conf.d/docker-php-ext-mongodb.ini \
 # end custom third extension
 	&& cd / \
 	&& docker-php-source delete \

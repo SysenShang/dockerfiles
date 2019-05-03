@@ -70,13 +70,12 @@ RUN set -xe; \
 	\
 	apk add --no-cache --virtual .fetch-deps \
 		gnupg \
-		wget \
 	; \
 	\
 	mkdir -p /usr/src; \
 	cd /usr/src; \
 	\
-	wget -O php.tar.xz "$PHP_URL"; \
+	curl -fSL "$PHP_URL" -o php.tar.xz; \
 	\
 	if [ -n "$PHP_SHA256" ]; then \
 		echo "$PHP_SHA256 *php.tar.xz" | sha256sum -c -; \
@@ -86,7 +85,7 @@ RUN set -xe; \
 	fi; \
 	\
 	if [ -n "$PHP_ASC_URL" ]; then \
-		wget -O php.tar.xz.asc "$PHP_ASC_URL"; \
+	    curl -fSL "$PHP_ASC_URL" -o php.tar.xz.asc; \
 		export GNUPGHOME="$(mktemp -d)"; \
 		for key in $GPG_KEYS; do \
 			gpg --batch --keyserver ha.pool.sks-keyservers.net --recv-keys "$key"; \
@@ -111,6 +110,17 @@ RUN set -xe \
 		libxml2-dev \
 		openssl-dev \
 		sqlite-dev \
+# start install custom deps
+		libpng-dev \
+		jpeg-dev \
+		freetype-dev \
+		bzip2-dev \
+		libxslt-dev \
+		gettext-dev \
+		icu-dev \
+		openldap-dev \
+		libmcrypt-dev \
+# end install custom deps
 	\
 	&& export CFLAGS="$PHP_CFLAGS" \
 		CPPFLAGS="$PHP_CPPFLAGS" \
@@ -144,6 +154,33 @@ RUN set -xe \
 		--with-libedit \
 		--with-openssl \
 		--with-zlib \
+# start custom extension
+		--enable-sockets \
+		--enable-calendar \
+		--with-ldap \
+		--with-freetype-dir \
+		--with-jpeg-dir \
+		--with-png-dir \
+		--with-gd \
+		--with-mysqli \
+		--with-pdo-mysql=mysqlnd \
+		--enable-shmop \
+		--enable-bcmath \
+		--enable-sysvmsg \
+		--enable-sysvsem \
+		--enable-sysvshm \
+		--with-mcrypt \
+		--enable-pcntl \
+		--enable-zip \
+		--with-bz2 \
+		--enable-soap \
+		--enable-exif \
+		--enable-intl \
+		--with-gettext \
+		--enable-opcache \
+		--with-xsl \
+		--with-xmlrpc \
+# end custom extension
 		\
 # bundled pcre does not support JIT on s390x
 # https://manpages.debian.org/stretch/libpcre3-dev/pcrejit.3.en.html#AVAILABILITY_OF_JIT_SUPPORT
@@ -159,6 +196,23 @@ RUN set -xe \
 # https://github.com/docker-library/php/issues/692 (copy default example "php.ini" files somewhere easily discoverable)
 	&& cp -v php.ini-* "$PHP_INI_DIR/" \
 	\
+# start custom third extension
+	&& cd /tmp \
+	&& apk add librdkafka-dev \
+	&& curl -fSL "http://pecl.php.net/get/redis-4.3.0.tgz" -o redis-4.3.0.tgz \ 
+	&& curl -fSL "http://pecl.php.net/get/mongodb-1.5.3.tgz" -o mongodb-1.5.3.tgz \ 
+	&& curl -fSL "http://pecl.php.net/get/rdkafka-3.1.0.tgz" -o rdkafka-3.1.0.tgz \ 
+	&& cd /tmp && tar zxf redis-4.3.0.tgz && cd redis-4.3.0 \
+	&& phpize && ./configure && make && make install \
+	&& cd /tmp && tar zxf mongodb-1.5.3.tgz && cd mongodb-1.5.3 \
+	&& phpize && ./configure && make && make install \
+	&& cd /tmp && tar zxf rdkafka-3.1.0.tgz && cd rdkafka-3.1.0 \
+	&& phpize && ./configure && make && make install \
+	&& cd /tmp && rm -rf /tmp/swoole* /tmp/redis* /tmp/mongodb* /tmp/rdkafka* && apk del librdkafka-dev \
+	&& echo "extension=redis.so" > /usr/local/etc/php/conf.d/docker-php-ext-redis.ini \
+	&& echo "extension=rdkafka.so" > /usr/local/etc/php/conf.d/docker-php-ext-rdkafka.ini \
+	&& echo "extension=mongodb.so" > /usr/local/etc/php/conf.d/docker-php-ext-mongodb.ini \
+# end custom third extension
 	&& cd / \
 	&& docker-php-source delete \
 	\
