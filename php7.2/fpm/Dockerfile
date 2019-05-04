@@ -85,7 +85,7 @@ RUN set -xe; \
 	fi; \
 	\
 	if [ -n "$PHP_ASC_URL" ]; then \
-	    curl -fSL "$PHP_ASC_URL" -o php.tar.xz.asc; \
+		curl -fSL "$PHP_ASC_URL" -o php.tar.xz.asc; \
 		export GNUPGHOME="$(mktemp -d)"; \
 		for key in $GPG_KEYS; do \
 			gpg --batch --keyserver ha.pool.sks-keyservers.net --recv-keys "$key"; \
@@ -120,6 +120,7 @@ RUN set -xe \
 		icu-dev \
 		openldap-dev \
 		libzip-dev \
+		libwebp-dev \
 # end install custom deps
 	\
 	&& export CFLAGS="$PHP_CFLAGS" \
@@ -196,21 +197,42 @@ RUN set -xe \
 	&& cp -v php.ini-* "$PHP_INI_DIR/" \
 	\
 # start custom third extension
-	&& cd /tmp \
 	&& apk add librdkafka-dev \
+	&& cd /tmp \
+	&& curl -fSL "https://github.com/ImageMagick/ImageMagick/archive/7.0.8-43.tar.gz" -o ImageMagick-7.0.8-43.tar.gz \
+	&& tar zxf ImageMagick-7.0.8-43.tar.gz \
+	&& cd ImageMagick-7.0.8-43 \
+	&& ./configure --disable-dependency-tracking \
+	&& make && make install \
+	&& cd /tmp \
 	&& curl -fSL "http://pecl.php.net/get/redis-4.3.0.tgz" -o redis-4.3.0.tgz \ 
 	&& curl -fSL "http://pecl.php.net/get/mongodb-1.5.3.tgz" -o mongodb-1.5.3.tgz \ 
 	&& curl -fSL "http://pecl.php.net/get/rdkafka-3.1.0.tgz" -o rdkafka-3.1.0.tgz \ 
+	&& curl -fSL "http://pecl.php.net/get/imagick-3.4.4.tgz" -o imagick-3.4.4.tgz \ 
+	&& curl -fSL "http://pecl.php.net/get/amqp-1.9.4.tgz" -o amqp-1.9.4.tgz \ 
 	&& cd /tmp && tar zxf redis-4.3.0.tgz && cd redis-4.3.0 \
 	&& phpize && ./configure && make && make install \
 	&& cd /tmp && tar zxf mongodb-1.5.3.tgz && cd mongodb-1.5.3 \
 	&& phpize && ./configure && make && make install \
 	&& cd /tmp && tar zxf rdkafka-3.1.0.tgz && cd rdkafka-3.1.0 \
 	&& phpize && ./configure && make && make install \
-	&& cd /tmp && rm -rf /tmp/swoole* /tmp/redis* /tmp/mongodb* /tmp/rdkafka* && apk del librdkafka-dev \
+	&& cd /tmp && tar zxf imagick-3.4.4.tgz && cd imagick-3.4.4 \
+	&& phpize && ./configure && make && make install \
+	&& cd /tmp && tar zxf amqp-1.9.4.tgz && cd amqp-1.9.4 \
+	&& phpize && ./configure && make && make install \
+	&& cd /tmp \
+	&& rm -rf /tmp/redis* \
+		/tmp/mongodb* \
+		/tmp/rdkafka* \
+		/tmp/ImageMagick* \
+		/tmp/imagick* \
+		/tmp/amqp* \
+	&& apk del librdkafka-dev \
 	&& echo "extension=redis.so" > /usr/local/etc/php/conf.d/docker-php-ext-redis.ini \
 	&& echo "extension=rdkafka.so" > /usr/local/etc/php/conf.d/docker-php-ext-rdkafka.ini \
 	&& echo "extension=mongodb.so" > /usr/local/etc/php/conf.d/docker-php-ext-mongodb.ini \
+	&& echo "extension=imagick.so" > /usr/local/etc/php/conf.d/docker-php-ext-imagick.ini \
+	&& echo "extension=amqp.so" > /usr/local/etc/php/conf.d/docker-php-ext-amqp.ini \
 # end custom third extension
 	&& cd / \
 	&& docker-php-source delete \
