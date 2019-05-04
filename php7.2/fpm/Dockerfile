@@ -119,6 +119,7 @@ RUN set -xe \
 		gettext-dev \
 		icu-dev \
 		openldap-dev \
+		libzip-dev \
 # end install custom deps
 	\
 	&& export CFLAGS="$PHP_CFLAGS" \

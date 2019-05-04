@@ -118,6 +118,8 @@ RUN set -xe \
 		icu-dev \
 		openldap-dev \
 		libmcrypt-dev \
+		libzip-dev \
+		libwebp-dev \
 # end install custom deps
 	\
 	&& export CFLAGS="$PHP_CFLAGS" \

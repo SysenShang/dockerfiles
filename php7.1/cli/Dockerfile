@@ -117,6 +117,8 @@ RUN set -xe \
 		icu-dev \
 		openldap-dev \
 		libmcrypt-dev \
+		libzip-dev \
+		libwebp-dev \
 # end install custom deps
 	\
 	&& export CFLAGS="$PHP_CFLAGS" \
@@ -170,7 +172,6 @@ RUN set -xe \
 		--enable-exif \
 		--enable-intl \
 		--with-gettext \
-		--enable-opcache \
 		--with-xsl \
 		--with-xmlrpc \
 # end custom extension
@@ -192,10 +193,17 @@ RUN set -xe \
 # start custom third extension
 	&& cd /tmp \
 	&& apk add nghttp2-dev librdkafka-dev \
+	&& curl -fSL "https://github.com/ImageMagick/ImageMagick/archive/7.0.8-43.tar.gz" -o ImageMagick-7.0.8-43.tar.gz \
+	&& tar zxf ImageMagick-7.0.8-43.tar.gz \
+	&& cd ImageMagick-7.0.8-43 \
+	&& ./configure --disable-dependency-tracking \
+	&& make && make install \
+	&& cd /tmp \
 	&& curl -fSL "http://pecl.php.net/get/swoole-4.3.3.tgz" -o swoole-4.3.3.tgz \
 	&& curl -fSL "http://pecl.php.net/get/redis-4.3.0.tgz" -o redis-4.3.0.tgz \ 
 	&& curl -fSL "http://pecl.php.net/get/mongodb-1.5.3.tgz" -o mongodb-1.5.3.tgz \ 
 	&& curl -fSL "http://pecl.php.net/get/rdkafka-3.1.0.tgz" -o rdkafka-3.1.0.tgz \ 
+	&& curl -fSL "http://pecl.php.net/get/imagick-3.4.4.tgz" -o imagick-3.4.4.tgz \ 
 	&& tar zxf swoole-4.3.3.tgz && cd swoole-4.3.3 \
 	&& phpize && ./configure --enable-openssl --enable-http2 --enable-sockets --enable-mysqlnd && make && make install \
 	&& cd /tmp && tar zxf redis-4.3.0.tgz && cd redis-4.3.0 \
@@ -204,11 +212,21 @@ RUN set -xe \
 	&& phpize && ./configure && make && make install \
 	&& cd /tmp && tar zxf rdkafka-3.1.0.tgz && cd rdkafka-3.1.0 \
 	&& phpize && ./configure && make && make install \
-	&& cd /tmp && rm -rf /tmp/swoole* /tmp/redis* /tmp/mongodb* /tmp/rdkafka* && apk del nghttp2-dev librdkafka-dev \
+	&& cd /tmp && tar zxf imagick-3.4.4.tgz && cd imagick-3.4.4 \
+	&& phpize && ./configure && make && make install \
+	&& cd /tmp \
+	&& rm -rf /tmp/swoole* \
+		/tmp/redis* \
+		/tmp/mongodb* \
+		/tmp/rdkafka* \
+		/tmp/ImageMagick* \
+		/tmp/imagick* \
+	&& apk del nghttp2-dev librdkafka-dev \
 	&& echo "extension=swoole.so" > /usr/local/etc/php/conf.d/docker-php-ext-swoole.ini \
 	&& echo "extension=redis.so" > /usr/local/etc/php/conf.d/docker-php-ext-redis.ini \
 	&& echo "extension=rdkafka.so" > /usr/local/etc/php/conf.d/docker-php-ext-rdkafka.ini \
 	&& echo "extension=mongodb.so" > /usr/local/etc/php/conf.d/docker-php-ext-mongodb.ini \
+	&& echo "extension=imagick.so" > /usr/local/etc/php/conf.d/docker-php-ext-imagick.ini \
 # end custom third extension
 	&& cd / \
 	&& docker-php-source delete \
