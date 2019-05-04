@@ -120,6 +120,7 @@ RUN set -xe \
 		openldap-dev \
 		libzip-dev \
 		libwebp-dev \
+		rabbitmq-c-dev \
 # end install custom deps
 	\
 	&& export CFLAGS="$PHP_CFLAGS" \
