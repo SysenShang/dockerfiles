@@ -224,6 +224,7 @@ RUN set -xe \
 		/tmp/imagick* \
 		/tmp/amqp* \
 	&& apk del librdkafka-dev \
+	&& echo "zend_extension=opcache.so" > /usr/local/etc/php/conf.d/docker-php-ext-opcache.ini \
 	&& echo "extension=redis.so" > /usr/local/etc/php/conf.d/docker-php-ext-redis.ini \
 	&& echo "extension=rdkafka.so" > /usr/local/etc/php/conf.d/docker-php-ext-rdkafka.ini \
 	&& echo "extension=mongodb.so" > /usr/local/etc/php/conf.d/docker-php-ext-mongodb.ini \
