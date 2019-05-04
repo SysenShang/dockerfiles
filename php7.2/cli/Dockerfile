@@ -118,7 +118,6 @@ RUN set -xe \
 		gettext-dev \
 		icu-dev \
 		openldap-dev \
-		libmcrypt-dev \
 # end install custom deps
 	\
 	&& export CFLAGS="$PHP_CFLAGS" \
@@ -168,7 +167,6 @@ RUN set -xe \
 		--enable-sysvmsg \
 		--enable-sysvsem \
 		--enable-sysvshm \
-		--with-mcrypt \
 		--enable-pcntl \
 		--enable-zip \
 		--with-bz2 \
