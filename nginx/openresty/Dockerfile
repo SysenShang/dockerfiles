@@ -62,6 +62,11 @@ LABEL resty_eval_post_make="${RESTY_EVAL_POST_MAKE}"
 # These are not intended to be user-specified
 ARG _RESTY_CONFIG_DEPS="--with-openssl=/tmp/openssl-${RESTY_OPENSSL_VERSION} --with-pcre=/tmp/pcre-${RESTY_PCRE_VERSION}"
 
+# ensure www-data user exists
+RUN set -x \
+	&& addgroup -g 82 -S www-data \
+	&& adduser -u 82 -D -S -G www-data www-data
+# 82 is the standard uid/gid for "www-data" in Alpine
 
 # 1) Install apk dependencies
 # 2) Download and untar OpenSSL, PCRE, and OpenResty
