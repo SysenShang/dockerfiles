@@ -3,7 +3,7 @@
 mkdir -p ~/docker/php7.1/fpm/php-fpm.d ~/docker/php7.1/fpm/logs
 
 docker run --name tmp-php -d wyanlord/php:7.1-fpm
-docker cp tmp-php:/usr/local/etc/php/php.ini ~/docker/php7.1/fpm/php.ini
+docker cp tmp-php:/usr/local/etc/php/php.ini-production ~/docker/php7.1/fpm/php.ini
 docker cp tmp-php:/usr/local/etc/php-fpm.d/docker.conf ~/docker/php7.1/fpm/php-fpm.d/docker.conf
 docker cp tmp-php:/usr/local/etc/php-fpm.d/www.conf ~/docker/php7.1/fpm/php-fpm.d/www.conf
 docker cp tmp-php:/usr/local/etc/php-fpm.d/zz-docker.conf ~/docker/php7.1/fpm/php-fpm.d/zz-docker.conf
