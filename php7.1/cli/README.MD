@@ -3,7 +3,7 @@
 mkdir -p ~/docker/php7.1/cli
 
 docker run --name tmp-php -d wyanlord/php:7.1-cli
-docker cp tmp-php:/usr/local/etc/php/php.ini ~/docker/php7.1/cli/php.ini
+docker cp tmp-php:/usr/local/etc/php/php.ini-production ~/docker/php7.1/cli/php.ini
 docker rm -f tmp-php
 ```
 
