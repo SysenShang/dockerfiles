@@ -84,6 +84,7 @@ RUN apk add --no-cache --virtual .build-deps \
         zlib \
         supervisor \
         ${RESTY_ADD_PACKAGE_RUNDEPS} \
+    && mkdir /etc/supervisord.d \
     && cd /tmp \
     && if [ -n "${RESTY_EVAL_PRE_CONFIGURE}" ]; then eval $(echo ${RESTY_EVAL_PRE_CONFIGURE}); fi \
     && curl -fSL https://www.openssl.org/source/openssl-${RESTY_OPENSSL_VERSION}.tar.gz -o openssl-${RESTY_OPENSSL_VERSION}.tar.gz \
@@ -110,14 +111,10 @@ RUN apk add --no-cache --virtual .build-deps \
         openresty-${RESTY_VERSION}.tar.gz openresty-${RESTY_VERSION} \
         pcre-${RESTY_PCRE_VERSION}.tar.gz pcre-${RESTY_PCRE_VERSION} \
     && apk del .build-deps \
-    && ln -sf /dev/stdout /usr/local/openresty/nginx/logs/access.log \
-    && ln -sf /dev/stderr /usr/local/openresty/nginx/logs/error.log
+    && rm -rf /tmp/*
 
-RUN sed -i 's/;nodaemon=false/nodaemon=true/g' /etc/supervisord.conf \
-    && echo '[program:nginx]' >> /etc/supervisord.conf \
-    && echo 'command=/usr/local/openresty/bin/openresty -g "daemon off;"' >> /etc/supervisord.conf \
-    && echo '[program:php-fpm]' >> /etc/supervisord.conf \
-    && echo 'command=/usr/local/sbin/php-fpm' >> /etc/supervisord.conf
+# Set fpm logs
+RUN sed -i 's/;error_log = log\/php-fpm.log/error_log = \/var\/log\/php-fpm.log/g' /usr/local/etc/php-fpm.conf
 
 # Add additional binaries into PATH for convenience
 ENV PATH=$PATH:/usr/local/openresty/luajit/bin:/usr/local/openresty/nginx/sbin:/usr/local/openresty/bin
@@ -125,6 +122,9 @@ ENV PATH=$PATH:/usr/local/openresty/luajit/bin:/usr/local/openresty/nginx/sbin:/
 # Copy nginx configuration files
 COPY nginx.conf /usr/local/openresty/nginx/conf/nginx.conf
 COPY nginx.vh.default.conf /etc/nginx/conf.d/default.conf
+
+# Copy supervisord configuration files
+COPY supervisord.conf /etc/supervisord.conf
 
 EXPOSE 80 443
 
