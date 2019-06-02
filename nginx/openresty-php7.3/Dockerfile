@@ -1,10 +1,7 @@
 # Dockerfile - alpine
 # https://github.com/openresty/docker-openresty
 
-ARG RESTY_IMAGE_BASE="alpine"
-ARG RESTY_IMAGE_TAG="3.9"
-
-FROM ${RESTY_IMAGE_BASE}:${RESTY_IMAGE_TAG}
+FROM wyanlord/php:7.3-fpm
 
 LABEL maintainer="Evan Wies <evan@neomantra.net>"
 
@@ -62,12 +59,6 @@ LABEL resty_eval_post_make="${RESTY_EVAL_POST_MAKE}"
 # These are not intended to be user-specified
 ARG _RESTY_CONFIG_DEPS="--with-openssl=/tmp/openssl-${RESTY_OPENSSL_VERSION} --with-pcre=/tmp/pcre-${RESTY_PCRE_VERSION}"
 
-# ensure www-data user exists
-RUN set -x \
-	&& addgroup -g 82 -S www-data \
-	&& adduser -u 82 -D -S -G www-data www-data
-# 82 is the standard uid/gid for "www-data" in Alpine
-
 # 1) Install apk dependencies
 # 2) Download and untar OpenSSL, PCRE, and OpenResty
 # 3) Build OpenResty
@@ -91,6 +82,7 @@ RUN apk add --no-cache --virtual .build-deps \
         libgcc \
         libxslt \
         zlib \
+        supervisor \
         ${RESTY_ADD_PACKAGE_RUNDEPS} \
     && cd /tmp \
     && if [ -n "${RESTY_EVAL_PRE_CONFIGURE}" ]; then eval $(echo ${RESTY_EVAL_PRE_CONFIGURE}); fi \
@@ -127,8 +119,9 @@ ENV PATH=$PATH:/usr/local/openresty/luajit/bin:/usr/local/openresty/nginx/sbin:/
 # Copy nginx configuration files
 COPY nginx.conf /usr/local/openresty/nginx/conf/nginx.conf
 COPY nginx.vh.default.conf /etc/nginx/conf.d/default.conf
+COPY supervisor.conf /etc/supervisor.conf
 
-CMD ["/usr/local/openresty/bin/openresty", "-g", "daemon off;"]
+CMD ["/usr/bin/supervisord"]
 
 # Use SIGQUIT instead of default SIGTERM to cleanly drain requests
 # See https://github.com/openresty/docker-openresty/blob/master/README.md#tips--pitfalls
