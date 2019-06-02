@@ -113,15 +113,22 @@ RUN apk add --no-cache --virtual .build-deps \
     && ln -sf /dev/stdout /usr/local/openresty/nginx/logs/access.log \
     && ln -sf /dev/stderr /usr/local/openresty/nginx/logs/error.log
 
+RUN sed -i 's/;nodaemon=false/nodaemon=true/g' /etc/supervisord.conf \
+    && echo '[program:nginx]' >> /etc/supervisord.conf \
+    && echo 'command=/usr/local/openresty/bin/openresty -g "daemon off;"' >> /etc/supervisord.conf \
+    && echo '[program:php-fpm]' >> /etc/supervisord.conf \
+    && echo 'command=/usr/local/sbin/php-fpm' >> /etc/supervisord.conf
+
 # Add additional binaries into PATH for convenience
 ENV PATH=$PATH:/usr/local/openresty/luajit/bin:/usr/local/openresty/nginx/sbin:/usr/local/openresty/bin
 
 # Copy nginx configuration files
 COPY nginx.conf /usr/local/openresty/nginx/conf/nginx.conf
 COPY nginx.vh.default.conf /etc/nginx/conf.d/default.conf
-COPY supervisor.conf /etc/supervisor.conf
 
-CMD ["/usr/bin/supervisord"]
+EXPOSE 80 443
+
+CMD ["/usr/bin/supervisord", "-c", "/etc/supervisord.conf"]
 
 # Use SIGQUIT instead of default SIGTERM to cleanly drain requests
 # See https://github.com/openresty/docker-openresty/blob/master/README.md#tips--pitfalls
